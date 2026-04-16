@@ -3,6 +3,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 app = Flask(__name__)
+app.config['PROPAGATE_EXCEPTIONS'] = True
 
 cred = credentials.Certificate("serviceAccountKey.json")
 if not firebase_admin._apps:
