@@ -1,14 +1,11 @@
 import os
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='templates', static_url_path='')
 
-# Cấu hình lỗi để dễ bắt bệnh nếu có sự cố
-app.config['PROPAGATE_EXCEPTIONS'] = True
-
-# Kết nối Firebase (Đảm bảo tên file JSON đúng 100% với file trên GitHub)
+# Kết nối Firebase
 cred_path = os.path.join(os.path.dirname(__file__), "serviceAccountKey.json")
 if not firebase_admin._apps:
     cred = credentials.Certificate(cred_path)
@@ -18,20 +15,20 @@ db = firestore.client()
 
 @app.route('/')
 def home():
-    # File này phải nằm trong thư mục templates
     return render_template('index.html')
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
-    results = []
+    teachers = []
+    keyword = ""
     if request.method == 'POST':
-        teacher_name = request.form.get('teacher_name')
-        if teacher_name:
-            # Tìm kiếm trong collection 'teachers' trên Firebase
-            docs = db.collection('teachers').where('name', '==', teacher_name).stream()
-            for doc in docs:
-                results.append(doc.to_dict())
-    return render_template('search.html', results=results)
+        keyword = request.form.get('keyword')
+        # Tìm trong database của Nhi
+        docs = db.collection("靜宜資管").stream()
+        for doc in docs:
+            data = doc.to_dict()
+            if keyword and keyword in data.get("name", ""):
+                teachers.append(data)
+    return render_template('search.html', teachers=teachers, keyword=keyword)
 
-# Biến quan trọng để Vercel nhận diện
 app = app
