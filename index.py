@@ -3,10 +3,12 @@ from flask import Flask, render_template, request
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-app = Flask(__name__, static_folder='templates', static_url_path='')
+# Khởi tạo Flask
+app = Flask(__name__)
 
-# Kết nối Firebase
+# Đường dẫn file chứng chỉ Firebase
 cred_path = os.path.join(os.path.dirname(__file__), "serviceAccountKey.json")
+
 if not firebase_admin._apps:
     cred = credentials.Certificate(cred_path)
     firebase_admin.initialize_app(cred)
@@ -23,7 +25,7 @@ def search():
     keyword = ""
     if request.method == 'POST':
         keyword = request.form.get('keyword')
-        # Tìm trong database của Nhi
+        # Tìm kiếm trong database của Nhi
         docs = db.collection("靜宜資管").stream()
         for doc in docs:
             data = doc.to_dict()
@@ -31,4 +33,5 @@ def search():
                 teachers.append(data)
     return render_template('search.html', teachers=teachers, keyword=keyword)
 
+# Biến để Vercel chạy app
 app = app
